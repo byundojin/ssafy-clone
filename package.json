@@ -1,0 +1,107 @@
+{
+  "name": "ssafy-clone",
+  "displayName": "SSAFY Clone",
+  "description": "SSAFY 실습 과제 탐색 및 클론 도구",
+  "version": "0.0.1",
+  "publisher": "byundojin",
+  "engines": {
+    "vscode": "^1.109.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -watch",
+    "scrape": "ts-node src/index.ts",
+    "vscode:prepublish": "npm run build"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ssafy-clone",
+          "title": "SSAFY",
+          "icon": "resources/ssafy.svg"
+        }
+      ]
+    },
+    "views": {
+      "ssafy-clone": [
+        {
+          "id": "ssafyCourses",
+          "name": "실습 과제"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ssafy.scrape",
+        "title": "과제 스크랩",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "ssafy.refresh",
+        "title": "새로고침",
+        "icon": "$(refresh)"
+      },
+{
+        "command": "ssafy.clone",
+        "title": "Clone",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "ssafy.cloneAll",
+        "title": "전체 Clone",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "ssafy.resetToken",
+        "title": "GitLab 토큰 설정",
+        "icon": "$(key)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "ssafy.scrape",
+          "when": "view == ssafyCourses",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ssafy.refresh",
+          "when": "view == ssafyCourses",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ssafy.resetToken",
+          "when": "view == ssafyCourses",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+{
+          "command": "ssafy.clone",
+          "when": "view == ssafyCourses && viewItem == assignment",
+          "group": "inline@2"
+        },
+        {
+          "command": "ssafy.cloneAll",
+          "when": "view == ssafyCourses && viewItem =~ /course|chapter/",
+          "group": "inline@2"
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.109.0",
+    "@vscode/vsce": "^3.7.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0"
+  }
+}

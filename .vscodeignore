@@ -1,0 +1,11 @@
+src/**
+.claude/**
+.vscode/**
+tsconfig.json
+.txt
+*.png
+README.md
+package-lock.json
+node_modules/.package-lock.json
+courses.json
+dist/index.js
