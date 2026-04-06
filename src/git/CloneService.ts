@@ -1,4 +1,5 @@
 import * as child_process from "child_process";
+import * as fs from "fs";
 import * as path from "path";
 
 export class CloneService {
@@ -8,6 +9,8 @@ export class CloneService {
   async clone(gitlabUrl: string, targetDir: string, destName: string): Promise<string> {
     const authedUrl = gitlabUrl.replace("https://", `https://oauth2:${this.token}@`);
     const dest = path.join(targetDir, destName);
+
+    fs.mkdirSync(targetDir, { recursive: true });
 
     await new Promise<void>((resolve, reject) => {
       const proc = child_process.spawn("git", ["clone", authedUrl, dest], {

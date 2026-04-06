@@ -180,7 +180,8 @@ export function activate(context: vscode.ExtensionContext) {
     // clone
     vscode.commands.registerCommand("ssafy.clone", async (item: AssignmentItem) => {
       try {
-        await ensureBrowserAlive(browser, cookiesPath, context.secrets);
+        const alive = await ensureBrowserAlive(browser, cookiesPath, context.secrets);
+        if (!alive) return;
       } catch (e: any) {
         vscode.window.showErrorMessage(`로그인 실패: ${e.message}`);
         return;
@@ -197,7 +198,8 @@ export function activate(context: vscode.ExtensionContext) {
     // cloneAll
     vscode.commands.registerCommand("ssafy.cloneAll", async (item: CourseItem | ChapterItem) => {
       try {
-        await ensureBrowserAlive(browser, cookiesPath, context.secrets);
+        const alive = await ensureBrowserAlive(browser, cookiesPath, context.secrets);
+        if (!alive) return;
       } catch (e: any) {
         vscode.window.showErrorMessage(`로그인 실패: ${e.message}`);
         return;
