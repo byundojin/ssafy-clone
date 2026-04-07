@@ -2,7 +2,7 @@
   "name": "ssafy-clone",
   "displayName": "SSAFY Clone",
   "description": "SSAFY 실습 과제 탐색 및 클론 도구",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "byundojin",
   "engines": {
     "vscode": "^1.109.0"
