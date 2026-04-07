@@ -70,6 +70,8 @@ async function openGitlabTokenPage(browser: BrowserManager) {
   await page.goto("https://lab.ssafy.com/-/user_settings/personal_access_tokens");
 }
 
+const log = vscode.window.createOutputChannel("SSAFY Clone");
+
 async function runClone(secrets: vscode.SecretStorage, browser: BrowserManager, tasks: CloneTask[]) {
   let token = await getGitlabToken(secrets);
   if (!token) {
@@ -87,28 +89,59 @@ async function runClone(secrets: vscode.SecretStorage, browser: BrowserManager, 
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `Clone 중... (0/${tasks.length})`,
+      title: "Clone 중...",
       cancellable: false,
     },
     async (progress) => {
-      const errors: string[] = [];
+      let succeeded = 0;
+      let existSkipped = 0;
+      const errors: { name: string; reason: string }[] = [];
 
       for (let i = 0; i < tasks.length; i++) {
         const { assignment, targetDir, destName } = tasks[i];
-        progress.report({ message: `(${i + 1}/${tasks.length}) ${assignment.name}` });
+
+        // .git이 있는 실제 clone된 디렉토리만 스킵
+        const dest = path.join(targetDir, destName);
+        if (fs.existsSync(path.join(dest, ".git"))) {
+          existSkipped++;
+          log.appendLine(`[스킵] ${assignment.name} — 이미 존재`);
+          continue;
+        }
+
+        progress.report({
+          message: `(${i + 1}/${tasks.length}) ${assignment.name}`,
+          increment: 100 / tasks.length,
+        });
 
         try {
           const gitlabUrl = await starter.getGitlabUrl(assignment);
           await cloneService.clone(gitlabUrl, targetDir, destName);
+          succeeded++;
+          log.appendLine(`[성공] ${assignment.name}`);
         } catch (e: any) {
-          errors.push(`${assignment.name}: ${e.message}`);
+          const reason = e.message?.split("\n")[0] ?? String(e);
+          errors.push({ name: assignment.name, reason });
+          log.appendLine(`[실패] ${assignment.name} — ${reason}`);
         }
       }
 
+      // 결과 요약
+      const parts: string[] = [];
+      if (succeeded > 0) parts.push(`${succeeded}개 완료`);
+      if (existSkipped > 0) parts.push(`${existSkipped}개 스킵(이미 존재)`);
+      if (errors.length > 0) parts.push(`${errors.length}개 실패`);
+
+      const summary = `Clone: ${parts.join(" / ")}`;
+
       if (errors.length > 0) {
-        vscode.window.showErrorMessage(`일부 실패:\n${errors.join("\n")}`);
+        log.appendLine(`\n--- 실패 목록 ---`);
+        for (const { name, reason } of errors) {
+          log.appendLine(`  ${name}: ${reason}`);
+        }
+        log.show(true);
+        vscode.window.showWarningMessage(`${summary} (Output 패널에서 상세 로그 확인)`);
       } else {
-        vscode.window.showInformationMessage(`${tasks.length}개 과제 clone 완료!`);
+        vscode.window.showInformationMessage(summary);
       }
     }
   );
@@ -191,7 +224,7 @@ export function activate(context: vscode.ExtensionContext) {
       await runClone(context.secrets, browser, [{
         assignment: item.assignment,
         targetDir: path.join(root, item.course.name, item.chapter.name),
-        destName: item.assignment.name,
+        destName: `[${item.assignment.type}] ${item.assignment.name}`,
       }]);
     }),
 
@@ -213,14 +246,14 @@ export function activate(context: vscode.ExtensionContext) {
         tasks = item.chapter.assignments.map((a) => ({
           assignment: a,
           targetDir: chapterDir,
-          destName: a.name,
+          destName: `[${a.type}] ${a.name}`,
         }));
       } else {
         tasks = item.course.chapters.flatMap((ch) =>
           ch.assignments.map((a) => ({
             assignment: a,
             targetDir: path.join(root, item.course.name, ch.name),
-            destName: a.name,
+            destName: `[${a.type}] ${a.name}`,
           }))
         );
       }

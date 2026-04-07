@@ -1,5 +1,4 @@
 .claude/
-.vscode/
 node_modules/
 dist/
 courses.json
