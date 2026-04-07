@@ -221,10 +221,11 @@ export function activate(context: vscode.ExtensionContext) {
       }
       const root = getWorkspaceRoot();
       if (!root) { vscode.window.showWarningMessage("폴더를 열어주세요."); return; }
+      const idx = item.chapter.assignments.indexOf(item.assignment) + 1;
       await runClone(context.secrets, browser, [{
         assignment: item.assignment,
         targetDir: path.join(root, item.course.name, item.chapter.name),
-        destName: `[${item.assignment.type}] ${item.assignment.name}`,
+        destName: `[${String(idx).padStart(2, "0")}-${item.assignment.type}] ${item.assignment.name}`,
       }]);
     }),
 
@@ -243,17 +244,17 @@ export function activate(context: vscode.ExtensionContext) {
       let tasks: CloneTask[];
       if (item instanceof ChapterItem) {
         const chapterDir = path.join(root, item.course.name, item.chapter.name);
-        tasks = item.chapter.assignments.map((a) => ({
+        tasks = item.chapter.assignments.map((a, i) => ({
           assignment: a,
           targetDir: chapterDir,
-          destName: `[${a.type}] ${a.name}`,
+          destName: `[${String(i + 1).padStart(2, "0")}-${a.type}] ${a.name}`,
         }));
       } else {
         tasks = item.course.chapters.flatMap((ch) =>
-          ch.assignments.map((a) => ({
+          ch.assignments.map((a, i) => ({
             assignment: a,
             targetDir: path.join(root, item.course.name, ch.name),
-            destName: `[${a.type}] ${a.name}`,
+            destName: `[${String(i + 1).padStart(2, "0")}-${a.type}] ${a.name}`,
           }))
         );
       }
