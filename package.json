@@ -2,7 +2,7 @@
   "name": "ssafy-clone",
   "displayName": "SSAFY Clone",
   "description": "SSAFY 실습 과제 탐색 및 클론 도구",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "byundojin",
   "engines": {
     "vscode": "^1.109.0"
@@ -46,7 +46,7 @@
         "title": "새로고침",
         "icon": "$(refresh)"
       },
-{
+      {
         "command": "ssafy.clone",
         "title": "Clone",
         "icon": "$(cloud-download)"
@@ -81,7 +81,7 @@
         }
       ],
       "view/item/context": [
-{
+        {
           "command": "ssafy.clone",
           "when": "view == ssafyCourses && viewItem == assignment",
           "group": "inline@2"
